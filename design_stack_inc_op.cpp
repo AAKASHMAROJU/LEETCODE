@@ -2,10 +2,12 @@
 class CustomStack {
 public:
     vector<int> v;
+    vector<int> arr;
     int sz;
     int idx=-1;
     CustomStack(int maxSize) {
         v.resize(maxSize);
+        arr.resize(maxSize, 0);
         sz=maxSize;
     }
     
@@ -16,7 +18,11 @@ public:
     
     int pop() {
         if(idx>=0){
-            int ele=v[idx];
+            int ele=v[idx]+arr[idx];
+            if(idx>0){
+                arr[idx-1]+=arr[idx];
+            }
+            arr[idx]=0;
             idx--;
             return ele;
         }
@@ -24,10 +30,8 @@ public:
     }
     
     void increment(int k, int val) {
-        if(idx<0) return;
-        for(int i=0;i<min(k,idx+1);i++){
-            v[i]=v[i]+val;
-        }
+        if(idx<0 ) return;
+        arr[min(idx, k-1)]+=val;
     }
 };
 
