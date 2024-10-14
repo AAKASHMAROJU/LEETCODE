@@ -1,98 +1,42 @@
 // Link: https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/
-#define ll long long
+#define pipii pair<int,pair<int,int>> 
 class Solution {
 public:
-    ll ga;
-    ll gb;
-    void f(vector<vector<int>>& v,int n, int idx, int a,int b, vector<int> &dp){
-        if(idx==n){
-            if(gb-ga>b-a){
-                gb=b;
-                ga=a;
-            }
-            else if(gb-ga==b-a){
-                if(ga>a){
-                    ga=a;
-                    gb=b;
-                }
-            }
-            return;
-            
-        }
-        if(dp[idx]!=-1) return;
-        if(v[idx].size()==2){
-            // considertaking v[idx][0]
-            int temp_a=a;
-            int temp_b=b;
-            a=min(a, v[idx][0]);
-            b=max(b, v[idx][0]);
-            f(v, n, idx+1, a, b,dp);
-            a=min(temp_a, v[idx][1]);
-            b=max(temp_b, v[idx][1]);
-            f(v, n, idx+1, a, b,dp);
-        }
-        else{
-            a=min(a, v[idx][0]);
-            b=max(b, v[idx][0]);
-            f(v, n, idx+1, a, b,dp);
-        }
-        
-    }
-    
-    
     vector<int> smallestRange(vector<vector<int>>& nums) {
+        priority_queue<pipii, vector<pipii>, greater<pipii>> pq;
         int k=nums.size();
         vector<int> sizes;
         for(auto i:nums){
             sizes.push_back(i.size());
         }
-        ll final_a=INT_MAX;
-        ll final_b=INT_MIN;
-        vector<vector<vector<int>>> choices;
-        for(int i=0;i<nums[0].size();i++){
-            vector<vector<int>> ch;
-            int curr=nums[0][i];
-            ch.push_back({nums[0][i]});
-            for(int j=1;j<k;j++){
-                vector<int> v;
-                // nums[j] is a sorted array
-                int idx1=lower_bound(nums[j].begin(), nums[j].end(), curr)-nums[j].begin();
-                int idx2=upper_bound(nums[j].begin(), nums[j].end(), curr)-nums[j].begin();
-                if(idx2>=0 && idx2<sizes[j]){
-                    // valid upper bound
-                    v.push_back(nums[j][idx2]);
-                }
-                if(idx1>=0 && idx1<sizes[j]){
-                    if(nums[j][idx1]==curr){
-                        
-                            v.push_back(nums[j][idx1]);
-                        
-                    }
-                    else{
-                        if(idx1-1>=0 && idx1-1<sizes[j]){
-                        v.push_back(nums[j][idx1-1]);
-                            }
-                    }
-                    // valid lower bound
-                    
-                }else if(idx1==sizes[j]){
-                    v.push_back(nums[j][idx1-1]);
-                }
-                ch.push_back(v);
+        int max_ele=INT_MIN;
+        int min_ele = INT_MAX;
+        for(int i=0;i<k;i++){
+            max_ele=max(max_ele, nums[i][0]);
+            min_ele = min(min_ele, nums[i][0]);
+        }
+        
+        for(int i=0;i<k;i++){
+            pq.push({nums[i][0], {i,0}});
+        }
+        int curr_max_ele=max_ele;
+        int curr_min_ele=min_ele;
+        while(pq.top().second.second+1<sizes[pq.top().second.first]){
+            int x=pq.top().second.first;
+            int y = pq.top().second.second;
+            int ele=pq.top().first;
+            pq.pop();
+            y++;
+            pq.push({nums[x][y], {x, y}});
+            curr_max_ele=max(curr_max_ele, nums[x][y]);
+            curr_min_ele=pq.top().first;
+            // cout<< curr_min_ele<<" , "<< curr_max_ele<<endl;
+            if(max_ele-min_ele>curr_max_ele-curr_min_ele){
+                max_ele=curr_max_ele;
+                min_ele=curr_min_ele;
             }
-            choices.push_back(ch);
-            
         }
-        vector<vector<int>> vp;
-        ga=0;
-            gb=INT_MAX;
-        for(auto i:choices){
-            int curr_a=i[0][0];
-            int curr_b=i[0][0];
-            vector<int> dp(k,-1);
-            // vector<vector<int>>
-            f(i,k,1, curr_a, curr_b, dp );
-        }
-        return {(int)ga,(int)gb};
+        
+        return {min_ele, max_ele};
     }
 };
