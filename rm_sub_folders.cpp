@@ -1,6 +1,5 @@
 // Link: https://leetcode.com/problems/remove-sub-folders-from-the-filesystem/
-class Node{
-    public:
+struct Node{
     map<string, Node*> mpp;
     bool end=false;
 };
@@ -11,76 +10,64 @@ class Trie{
     Trie(){
         root=new Node();
     }
-    void insert(vector<string> vs){
+    void insert(string s){
+        s+="/";
         Node* temp=root;
-        for(auto i:vs){
-            cout<<i<<"===="<<endl;
-            if(temp->mpp.count(i)==0){
-               
-                temp->mpp[i]=new Node();
+        int m=s.length();
+        string s1="";
+        for(int i=1;i<m;i++){
+            if(s[i]!='/'){
+                s1+=s[i];
             }
-            temp=temp->mpp[i];
+            else{
+                if(temp->mpp.count(s1)==0){
+                    temp->mpp[s1]=new Node();
+                }
+                temp=temp->mpp[s1];
+                s1="";
+            }
         }
         temp->end=true;
-
     }
     
-    void f(Node* root, string& ds, vector<string>& res){
-        // if(!root) return;
-        if(root->end){
-            if(ds.size()){
-            ds.pop_back();
-            res.push_back(ds);
+    string query(string s){
+        s+="/";
+        Node* temp=root;
+        int m=s.length();
+        string s1="";
+        string res="";
+        for(int i=1;i<m;i++){
+            if(s[i]!='/'){
+                s1+=s[i];
             }
-            return;
-                
-        }
-        for(auto i:root->mpp){
-            ds+=i.first;
-            if(i.second){
-            f(i.second, ds, res);
+            else{
+                if(temp->end==false){
+                    res+="/";
+                    res+=s1;
+                    temp=temp->mpp[s1];
+                }
+                else{
+                    break;
+                }
+                 s1="";
             }
-            ds.pop_back();
         }
-    }
-    
-    
-    vector<string> getResult(){
-        string ds="";
-        vector<string> res;
-  
-         f(root, ds, res);
         return res;
-    }
+    }        
 };
-
 
 class Solution {
 public:
     vector<string> removeSubfolders(vector<string>& folder) {
-        Trie* t = new Trie();
-        vector<vector<string>> vs;
+        int n=folder.size();
+        Trie* t=new Trie();
+        for(int i=0;i<n;i++){
+            t->insert(folder[i]);
+        }
+        set<string> res;
         for(auto i:folder){
-            vector<string> v;
-            string s="";
-            for(auto j:i){
-                if(j!='/'){
-                    s+=j;
-                }else{
-                    v.push_back(s);
-                    s="";
-                }
-            }
-            v.push_back(s);
-            v.erase(v.begin());
-            vs.push_back(v);
+            res.insert(t->query(i));
         }
-        for(auto i:vs){
-            
-            t->insert(i);
-        }
-        return t->getResult();
-        
-        
+        return vector<string>(res.begin(), res.end());
     }
 };
